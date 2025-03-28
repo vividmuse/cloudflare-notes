@@ -1,0 +1,8 @@
+name = "memos-lite"
+main = "src/index.ts"
+compatibility_date = "2025-03-27"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "memos-lite-db"
+database_id = "9e215a44-48b7-49b3-b646-8992c7bca024"

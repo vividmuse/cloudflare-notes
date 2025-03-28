@@ -1,0 +1,157 @@
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f9fafb;
+  margin: 0;
+}
+
+/* 日历样式 */
+.modern-calendar {
+  width: 100%;
+  max-width: 100%;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.modern-calendar .react-calendar__tile {
+  padding: 0.75em 0.5em;
+  font-size: 0.875rem;
+  height: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.modern-calendar .react-calendar__tile--active {
+  background: #e5e7eb !important;
+  color: #111827 !important;
+  font-weight: 600;
+}
+
+.modern-calendar .react-calendar__tile--now {
+  background: transparent !important;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.modern-calendar .react-calendar__navigation {
+  margin-bottom: 0.5em;
+  height: 2.5rem;
+}
+
+.modern-calendar .react-calendar__navigation button {
+  font-size: 0.875rem;
+  color: #374151;
+  background: transparent;
+  min-width: 2.5rem;
+}
+
+.modern-calendar .react-calendar__navigation button:disabled {
+  background-color: transparent;
+}
+
+.modern-calendar .react-calendar__month-view__weekdays {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  height: 2rem;
+}
+
+.modern-calendar .react-calendar__month-view__weekdays__weekday {
+  padding: 0.5rem 0;
+}
+
+.modern-calendar .react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+}
+
+.modern-calendar .react-calendar__month-view__days__day--weekend {
+  color: #111827;
+}
+
+.modern-calendar .react-calendar__month-view__days__day--neighboringMonth {
+  color: #9ca3af;
+}
+
+.modern-calendar .react-calendar__tile:enabled:hover,
+.modern-calendar .react-calendar__tile:enabled:focus {
+  background-color: #f3f4f6;
+}
+
+.modern-calendar .react-calendar__tile--active:enabled:hover,
+.modern-calendar .react-calendar__tile--active:enabled:focus {
+  background: #e5e7eb !important;
+}
+
+.modern-calendar .react-calendar__tile--disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 笔记编辑器样式 */
+.note-editor textarea {
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.note-editor textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 工具栏按钮样式 */
+.toolbar-button {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.toolbar-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  color: #2563eb;
+  background-color: #eff6ff;
+  transition: all 0.2s;
+}
+
+.tag:hover {
+  background-color: #dbeafe;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

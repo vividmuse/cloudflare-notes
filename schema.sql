@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  tags TEXT NOT NULL DEFAULT '[]',
+  is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
+  is_todo BOOLEAN NOT NULL DEFAULT FALSE
+);
