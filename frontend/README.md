@@ -4,6 +4,7 @@ A modern note-taking application built with React and TypeScript.
 
 ## Features
 
+- 🔐 User authentication with JWT
 - 📝 Rich text editing with Markdown support
 - 🏷️ Tag organization with `#tag` syntax
 - ✅ Todo list support with checkbox syntax
@@ -22,6 +23,7 @@ A modern note-taking application built with React and TypeScript.
 - date-fns
 - DOMPurify
 - markdown-it
+- JWT Authentication
 
 ## Getting Started
 
@@ -47,16 +49,28 @@ npm run dev
 
 ```
 src/
-  ├── App.tsx        # Main application component
-  ├── App.css        # Global styles
-  ├── main.tsx       # Entry point
-  ├── components/    # React components
-  ├── hooks/         # Custom hooks
-  ├── types/         # TypeScript types
-  └── utils/         # Utility functions
+  ├── App.tsx           # Main application component
+  ├── App.css           # Global styles
+  ├── main.tsx          # Entry point
+  │   ├── components/   # React components
+  │   │   ├── Auth/    # Authentication components
+  │   │   ├── Notes/   # Note related components
+  │   │   └── Common/  # Shared components
+  │   ├── hooks/        # Custom hooks
+  │   │   ├── useAuth.ts   # Authentication hook
+  │   │   └── useNotes.ts  # Notes management hook
+  │   ├── types/        # TypeScript types
+  └── utils/            # Utility functions
 ```
 
 ## Features Guide
+
+### Authentication
+- Register with email and password
+- Login with credentials
+- Automatic token refresh
+- Protected routes
+- Persistent login state
 
 ### Note Creation
 - Use Markdown syntax for formatting
@@ -77,6 +91,38 @@ src/
 ### Keyboard Shortcuts
 - `Ctrl/Cmd + Enter` - Save note
 - `Esc` - Cancel editing
+
+## Development
+
+### Environment Variables
+
+Create `.env`:
+```
+VITE_API_URL=http://localhost:5000/api
+```
+
+### Authentication Flow
+
+1. User registers/logs in
+2. JWT token is stored in localStorage
+3. Token is included in all API requests
+4. Token refresh happens automatically
+5. Protected routes redirect to login
+
+### Protected Routes
+
+All note operations require authentication. Users will be redirected to the login page if:
+- No valid token exists
+- Token has expired
+- Server returns 401/403 error
+
+### State Management
+
+Authentication state is managed using React Context and is available throughout the app using the `useAuth` hook:
+
+```typescript
+const { user, login, logout, register } = useAuth();
+```
 
 ## Contributing
 
