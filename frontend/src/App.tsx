@@ -247,8 +247,8 @@ function NoteEditor({ note, onCancel }: { note?: Note; onCancel: () => void }) {
           }}
         />
       ) : (
-        <textarea
-          value={content}
+      <textarea
+        value={content}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
           placeholder="Write your markdown here... Use #tag to add tags"
           className="w-full h-40 p-2 border rounded"
