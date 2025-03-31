@@ -22,11 +22,11 @@ html, body {
   }
   
   .note-actions {
-    @apply flex-wrap gap-2;
+    @apply flex-wrap gap-1;
   }
   
   .note-actions button {
-    @apply p-2 w-10 h-10;
+    @apply p-1;
   }
   
   .editor-container {
@@ -38,39 +38,23 @@ html, body {
   }
   
   .editor-toolbar button {
-    @apply p-2 w-10 h-10 text-lg;
+    @apply p-2 min-w-[40px] min-h-[40px] text-lg;
   }
-  
-  .editor-toolbar button svg {
-    @apply w-6 h-6;
+
+  .editor-toolbar .action-button {
+    @apply p-2 min-w-[40px] min-h-[40px] text-lg;
+  }
+
+  .editor-toolbar .save-button {
+    @apply px-4 py-2 min-w-[60px] min-h-[40px] text-base font-medium;
   }
   
   .tag-container {
-    @apply flex-wrap gap-2;
+    @apply flex-wrap gap-1;
   }
   
   .tag {
-    @apply text-sm px-3 py-1.5;
-  }
-
-  /* 调整编辑器内容区域 */
-  .editor-content {
-    @apply p-3;
-  }
-
-  /* 调整文本输入框 */
-  .editor-content textarea {
-    @apply text-base p-3;
-  }
-
-  /* 调整预览模式下的内容 */
-  .editor-content .prose {
-    @apply text-base;
-  }
-
-  /* 调整保存按钮 */
-  .save-button {
-    @apply px-4 py-2 text-base;
+    @apply text-xs px-2 py-0.5;
   }
 }
 
@@ -82,6 +66,33 @@ html, body {
   
   .main-content {
     @apply w-[calc(100%-16rem)];
+  }
+
+  .editor-toolbar button {
+    @apply p-2 min-w-[36px] min-h-[36px] text-base;
+  }
+
+  .editor-toolbar .action-button {
+    @apply p-2 min-w-[36px] min-h-[36px] text-base;
+  }
+
+  .editor-toolbar .save-button {
+    @apply px-4 py-2 min-w-[56px] min-h-[36px] text-sm font-medium;
+  }
+}
+
+/* 桌面端优化 */
+@media (min-width: 1025px) {
+  .editor-toolbar button {
+    @apply p-2 min-w-[32px] min-h-[32px] text-base;
+  }
+
+  .editor-toolbar .action-button {
+    @apply p-2 min-w-[32px] min-h-[32px] text-base;
+  }
+
+  .editor-toolbar .save-button {
+    @apply px-4 py-2 min-w-[52px] min-h-[32px] text-sm font-medium;
   }
 }
 
@@ -176,8 +187,7 @@ html, body {
     @apply active:bg-blue-300;
   }
 
-  /* 增加触摸反馈区域 */
   .editor-toolbar button {
-    @apply active:bg-gray-100 dark:active:bg-gray-700;
+    @apply active:bg-gray-200 dark:active:bg-gray-700;
   }
 } 
