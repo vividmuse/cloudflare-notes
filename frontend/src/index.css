@@ -22,11 +22,11 @@ html, body {
   }
   
   .note-actions {
-    @apply flex-wrap gap-1;
+    @apply flex-wrap gap-2;
   }
   
   .note-actions button {
-    @apply p-1;
+    @apply p-3 min-w-[44px] min-h-[44px];
   }
   
   .editor-container {
@@ -34,27 +34,37 @@ html, body {
   }
   
   .editor-toolbar {
-    @apply flex-wrap gap-2 p-3;
+    @apply flex-wrap gap-3 p-4 mb-2 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm;
   }
   
   .editor-toolbar button {
-    @apply p-2 min-w-[40px] min-h-[40px] text-lg;
+    @apply p-3 min-w-[48px] min-h-[48px] text-xl bg-white dark:bg-gray-700 rounded-lg shadow-sm;
   }
 
   .editor-toolbar .action-button {
-    @apply p-2 min-w-[40px] min-h-[40px] text-lg;
+    @apply p-3 min-w-[48px] min-h-[48px] text-xl bg-white dark:bg-gray-700 rounded-lg shadow-sm;
   }
 
   .editor-toolbar .save-button {
-    @apply px-4 py-2 min-w-[60px] min-h-[40px] text-base font-medium;
+    @apply px-6 py-3 min-w-[80px] min-h-[48px] text-lg font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm;
   }
   
   .tag-container {
-    @apply flex-wrap gap-1;
+    @apply flex-wrap gap-2;
   }
   
   .tag {
-    @apply text-xs px-2 py-0.5;
+    @apply text-sm px-3 py-1.5;
+  }
+
+  /* 新增：工具栏按钮的激活状态 */
+  .editor-toolbar button:active,
+  .editor-toolbar .action-button:active {
+    @apply bg-gray-100 dark:bg-gray-600 transform scale-95;
+  }
+
+  .editor-toolbar .save-button:active {
+    @apply bg-blue-600 transform scale-95;
   }
 }
 
