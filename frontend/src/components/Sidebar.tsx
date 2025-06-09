@@ -86,9 +86,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return null;
   };
 
-  // 获取所有标签
+  // 提取内容中的标签
+  const extractTags = (content: string): string[] => {
+    const tagRegex = /#([^\s#]+)/g;
+    const tags: string[] = [];
+    let match;
+    while ((match = tagRegex.exec(content)) !== null) {
+      if (!tags.includes(match[1])) {
+        tags.push(match[1]);
+      }
+    }
+    return tags;
+  };
+
+  // 获取所有标签（从 memo.tags 字段和内容中提取）
   const allTags = Array.from(new Set(
-    memos.flatMap((memo: Memo) => memo.tags || [])
+    memos.flatMap((memo: Memo) => {
+      // 从 memo.tags 获取
+      const apiTags = Array.isArray(memo.tags) ? memo.tags : 
+                     typeof memo.tags === 'string' ? JSON.parse(memo.tags || '[]') : [];
+      // 从内容中提取
+      const contentTags = extractTags(memo.content);
+      
+      return [...apiTags, ...contentTags];
+    })
   )).sort();
 
   // 搜索事件处理

@@ -117,7 +117,10 @@ export const MemoView: React.FC<MemoViewProps> = ({
   const tags = extractTags(memo.content);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+    <div 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200"
+      onDoubleClick={() => onEdit?.(memo)}
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2 text-xs text-gray-500">

@@ -98,6 +98,22 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = content.substring(start, end);
+    
+    // 特殊处理代码块
+    if (before === '\n```\n' && after === '\n```\n') {
+      const newContent = content.substring(0, start) + 
+        '\n```\n' + (selectedText || '// 在这里输入代码') + '\n```\n' + 
+        content.substring(end);
+      setContent(newContent);
+      
+      setTimeout(() => {
+        textarea.focus();
+        const cursorPos = selectedText ? start + 5 : start + 5;
+        textarea.setSelectionRange(cursorPos, cursorPos + (selectedText || '// 在这里输入代码').length);
+      }, 0);
+      return;
+    }
+    
     const newContent = content.substring(0, start) + before + selectedText + after + content.substring(end);
     setContent(newContent);
     
@@ -157,7 +173,7 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
             title="代码块"
           >
-            <code className="text-xs">{ }</code>
+            <span className="text-xs font-mono">{`{}`}</span>
           </button>
           <button
             onClick={() => insertMarkdown('[', '](url)')}

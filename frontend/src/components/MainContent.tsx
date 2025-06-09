@@ -148,7 +148,8 @@ export const MainContent: React.FC<MainContentProps> = ({
   }
 
   return (
-    <div className="flex-1 p-6 bg-gray-50">
+    <div className="flex-1 bg-gray-50 overflow-auto">
+      <div className="p-6">
       {/* 头部工具栏 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
@@ -231,6 +232,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           className="max-w-6xl mx-auto"
         />
       )}
+      </div>
     </div>
   );
 }; 
