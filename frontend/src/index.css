@@ -216,19 +216,19 @@ body {
 }
 
 .memo-content pre {
-  @apply overflow-x-auto bg-gray-50 p-3 rounded-md border;
+  @apply overflow-x-auto bg-gray-900 p-4 rounded-md border text-gray-100;
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
 }
 
 .memo-content code {
-  @apply bg-gray-100 px-1 py-0.5 rounded text-sm;
+  @apply bg-gray-200 px-1.5 py-0.5 rounded text-sm text-gray-800;
   word-break: break-all !important;
 }
 
 .memo-content pre code {
-  @apply bg-transparent p-0;
+  @apply bg-transparent p-0 text-gray-100;
   white-space: pre-wrap !important;
   word-break: break-all !important;
 }

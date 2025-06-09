@@ -52,16 +52,18 @@ export const MainContent: React.FC<MainContentProps> = ({
 
   // 过滤 memos
   const filteredMemos = memos.filter((memo: Memo) => {
+    const memoTags = memo.tags || [];
+    
     const matchesSearch = !searchQuery || 
       memo.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      memo.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      memoTags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const memoDate = new Date(memo.createTime);
     const matchesDate = !selectedDate || 
       memoDate.toDateString() === selectedDate.toDateString();
     
     const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => memo.tags.includes(tag));
+      selectedTags.every(tag => memoTags.includes(tag));
     
     return matchesSearch && matchesDate && matchesTags;
   });
