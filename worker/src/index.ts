@@ -149,11 +149,95 @@ app.get('/', (c) => {
   });
 });
 
+// ========== memos 兼容的公开 API 端点 ==========
+
+// 系统状态端点 - memos 兼容
+app.get('/api/v1/status', async (c) => {
+  try {
+    // 检查数据库连接
+    await c.env.DB.prepare('SELECT 1').first();
+    
+    // 获取管理员设置
+    let allowRegistration = true;
+    try {
+      const setting = await c.env.DB.prepare(
+        'SELECT value FROM workspace_settings WHERE name = ?'
+      ).bind('allowRegistration').first() as any;
+      if (setting) {
+        allowRegistration = setting.value === 'true';
+      }
+    } catch (error) {
+      // 如果表不存在或查询失败，使用默认值
+      allowRegistration = true;
+    }
+    
+    return c.json({
+      host: {
+        name: "memos-lite",
+        version: "0.24.0",
+        mode: "prod",
+        allowRegistration,
+        disablePasswordLogin: false,
+        disablePublicMemos: false,
+        maxUploadSizeMiB: 32,
+        customizedProfile: {
+          title: "Memos Lite",
+          description: "A lightweight, serverless memos implementation",
+          logoUrl: "",
+          locale: "en",
+          appearance: "system",
+          externalUrl: ""
+        },
+        storageServiceId: "",
+        localStoragePath: "/var/opt/memos",
+        memoDisplayWithUpdatedTs: false,
+        additionalScript: "",
+        additionalStyle: ""
+      },
+      profile: {
+        mode: "prod",
+        version: "0.24.0"
+      }
+    });
+  } catch (error) {
+    return c.json({ 
+      error: 'Service unavailable',
+      details: (error as Error).message 
+    }, 503);
+  }
+});
+
+// 工作区配置端点 - memos 兼容
+app.get('/api/v1/workspace/profile', async (c) => {
+  try {
+    return c.json({
+      name: "workspace/1",
+      owner: "users/1",
+      profile: {
+        title: "Memos Lite",
+        description: "A lightweight, serverless memos implementation",
+        logoUrl: "",
+        locale: "en",
+        appearance: "system",
+        memoVisibility: "PRIVATE",
+        version: "0.24.0"
+      }
+    });
+  } catch (error) {
+    return c.json({ 
+      error: 'Failed to get workspace profile',
+      details: (error as Error).message 
+    }, 500);
+  }
+});
+
 // 添加 JWT 认证中间件
 app.use('/api/v1/*', async (c, next) => {
-  // 跳过登录和注册接口的认证
+  // 跳过登录、注册和公开接口的认证
   if (c.req.path === '/api/v1/auth/login' || 
       c.req.path === '/api/v1/auth/signup' ||
+      c.req.path === '/api/v1/status' ||
+      c.req.path === '/api/v1/workspace/profile' ||
       c.req.path.startsWith('/api/v1/auth/')) {
     return next();
   }

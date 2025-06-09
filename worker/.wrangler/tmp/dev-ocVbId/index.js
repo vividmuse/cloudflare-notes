@@ -3243,8 +3243,79 @@ app.get("/", (c) => {
     }
   });
 });
+app.get("/api/v1/status", async (c) => {
+  try {
+    await c.env.DB.prepare("SELECT 1").first();
+    let allowRegistration = true;
+    try {
+      const setting = await c.env.DB.prepare(
+        "SELECT value FROM workspace_settings WHERE name = ?"
+      ).bind("allowRegistration").first();
+      if (setting) {
+        allowRegistration = setting.value === "true";
+      }
+    } catch (error) {
+      allowRegistration = true;
+    }
+    return c.json({
+      host: {
+        name: "memos-lite",
+        version: "0.24.0",
+        mode: "prod",
+        allowRegistration,
+        disablePasswordLogin: false,
+        disablePublicMemos: false,
+        maxUploadSizeMiB: 32,
+        customizedProfile: {
+          title: "Memos Lite",
+          description: "A lightweight, serverless memos implementation",
+          logoUrl: "",
+          locale: "en",
+          appearance: "system",
+          externalUrl: ""
+        },
+        storageServiceId: "",
+        localStoragePath: "/var/opt/memos",
+        memoDisplayWithUpdatedTs: false,
+        additionalScript: "",
+        additionalStyle: ""
+      },
+      profile: {
+        mode: "prod",
+        version: "0.24.0"
+      }
+    });
+  } catch (error) {
+    return c.json({
+      error: "Service unavailable",
+      details: error.message
+    }, 503);
+  }
+});
+app.get("/api/v1/workspace/profile", async (c) => {
+  try {
+    return c.json({
+      name: "workspace/1",
+      owner: "users/1",
+      profile: {
+        title: "Memos Lite",
+        description: "A lightweight, serverless memos implementation",
+        logoUrl: "",
+        locale: "en",
+        appearance: "system",
+        memoVisibility: "PRIVATE",
+        version: "0.24.0"
+      }
+    });
+  } catch (error) {
+    return c.json({
+      error: "Failed to get workspace profile",
+      details: error.message
+    }, 500);
+  }
+});
 app.use("/api/v1/*", async (c, next) => {
-  if (c.req.path === "/api/v1/auth/login" || c.req.path === "/api/v1/auth/signup" || c.req.path.startsWith("/api/v1/auth/")) {
+  if (c.req.path === "/api/v1/auth/login" || c.req.path === "/api/v1/auth/signup" || c.req.path === "/api/v1/status" || c.req.path === "/api/v1/workspace/profile" || c.req.path.startsWith("/api/v1/auth/")) {
     return next();
   }
   const auth = c.req.header("Authorization");
