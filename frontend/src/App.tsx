@@ -13,6 +13,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -63,6 +64,10 @@ function App() {
     setUser(updatedUser);
   };
 
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -87,11 +92,13 @@ function App() {
         onTagSelect={handleTagSelect}
         onLogout={handleLogout}
         onUserUpdate={handleUserUpdate}
+        onFilterChange={handleFilterChange}
       />
       <MainContent
         searchQuery={searchQuery}
         selectedDate={selectedDate}
         selectedTags={selectedTags}
+        activeFilter={activeFilter}
         onTagSelect={handleTagSelect}
       />
     </div>

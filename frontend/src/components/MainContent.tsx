@@ -15,6 +15,7 @@ interface MainContentProps {
   selectedDate: Date | null;
   selectedTags: string[];
   searchQuery: string;
+  activeFilter: string;
   onTagSelect?: (tags: string[]) => void;
 }
 
@@ -22,6 +23,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   selectedDate,
   selectedTags,
   searchQuery,
+  activeFilter,
   onTagSelect
 }) => {
   const [memos, setMemos] = useState<Memo[]>([]);
@@ -54,18 +56,40 @@ export const MainContent: React.FC<MainContentProps> = ({
   const filteredMemos = memos.filter((memo: Memo) => {
     const memoTags = memo.tags || [];
     
+    // 基础过滤：搜索
     const matchesSearch = !searchQuery || 
       memo.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       memoTags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
+    // 日期过滤
     const memoDate = new Date(memo.createTime);
     const matchesDate = !selectedDate || 
       memoDate.toDateString() === selectedDate.toDateString();
     
+    // 标签过滤
     const matchesTags = selectedTags.length === 0 || 
       selectedTags.every(tag => memoTags.includes(tag));
     
-    return matchesSearch && matchesDate && matchesTags;
+    // 类型过滤
+    let matchesFilter = true;
+    switch (activeFilter) {
+      case 'pinned':
+        matchesFilter = memo.pinned === true;
+        break;
+      case 'todo':
+        // 检查内容中是否包含待办事项标记
+        matchesFilter = memo.content.includes('- [ ]') || memo.content.includes('- [x]');
+        break;
+      case 'public':
+        matchesFilter = memo.visibility === 'PUBLIC';
+        break;
+      case 'all':
+      default:
+        matchesFilter = true;
+        break;
+    }
+    
+    return matchesSearch && matchesDate && matchesTags && matchesFilter;
   });
 
   // 处理新建/编辑 memo

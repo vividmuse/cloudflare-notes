@@ -25,6 +25,7 @@ interface SidebarProps {
   onTagSelect: (tags: string[]) => void;
   onLogout: () => void;
   onUserUpdate?: (user: User) => void;
+  onFilterChange?: (filter: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -33,7 +34,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDateSelect, 
   onTagSelect, 
   onLogout,
-  onUserUpdate 
+  onUserUpdate,
+  onFilterChange 
 }) => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     public: 0
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,9 +111,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       // 从内容中提取
       const contentTags = extractTags(memo.content);
       
+      console.log('Memo:', memo.id, 'API tags:', apiTags, 'Content tags:', contentTags);
       return [...apiTags, ...contentTags];
     })
-  )).sort();
+  )).filter(tag => tag && tag.trim()).sort();
+
+  console.log('All tags:', allTags);
 
   // 搜索事件处理
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,9 +148,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setSearchQuery('');
     setSelectedDate(null);
     setSelectedTags([]);
+    setActiveFilter('all');
     onSearch('');
     onDateSelect(null);
     onTagSelect([]);
+    onFilterChange?.('all');
+  };
+
+  // 处理过滤器选择
+  const handleFilterSelect = (filter: string) => {
+    setActiveFilter(filter);
+    onFilterChange?.(filter);
   };
 
   return (
@@ -190,31 +204,81 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* 导航菜单 */}
       <div className="p-4">
         <nav className="space-y-1">
-          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <button 
+            onClick={() => handleFilterSelect('all')}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left ${
+              activeFilter === 'all' 
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
             <FiHome className="w-4 h-4" />
             <span className="font-medium">全部笔记</span>
-            <span className="ml-auto text-sm bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+            <span className={`ml-auto text-sm px-2 py-0.5 rounded-full ${
+              activeFilter === 'all' 
+                ? 'bg-indigo-100 text-indigo-700' 
+                : 'text-gray-500'
+            }`}>
               {stats.total}
             </span>
-          </a>
+          </button>
           
-          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+          <button 
+            onClick={() => handleFilterSelect('pinned')}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left ${
+              activeFilter === 'pinned' 
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
             <FiBookmark className="w-4 h-4" />
             <span>置顶笔记</span>
-            <span className="ml-auto text-sm text-gray-500">{stats.pinned}</span>
-          </a>
+            <span className={`ml-auto text-sm px-2 py-0.5 rounded-full ${
+              activeFilter === 'pinned' 
+                ? 'bg-indigo-100 text-indigo-700' 
+                : 'text-gray-500'
+            }`}>
+              {stats.pinned}
+            </span>
+          </button>
           
-          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+          <button 
+            onClick={() => handleFilterSelect('todo')}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left ${
+              activeFilter === 'todo' 
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
             <FiCheckSquare className="w-4 h-4" />
             <span>待办事项</span>
-            <span className="ml-auto text-sm text-gray-500">{stats.todo}</span>
-          </a>
+            <span className={`ml-auto text-sm px-2 py-0.5 rounded-full ${
+              activeFilter === 'todo' 
+                ? 'bg-indigo-100 text-indigo-700' 
+                : 'text-gray-500'
+            }`}>
+              {stats.todo}
+            </span>
+          </button>
           
-          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+          <button 
+            onClick={() => handleFilterSelect('public')}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left ${
+              activeFilter === 'public' 
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
             <FiGlobe className="w-4 h-4" />
             <span>公开笔记</span>
-            <span className="ml-auto text-sm text-gray-500">{stats.public}</span>
-          </a>
+            <span className={`ml-auto text-sm px-2 py-0.5 rounded-full ${
+              activeFilter === 'public' 
+                ? 'bg-indigo-100 text-indigo-700' 
+                : 'text-gray-500'
+            }`}>
+              {stats.public}
+            </span>
+          </button>
         </nav>
       </div>
 
