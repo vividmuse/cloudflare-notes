@@ -15,12 +15,14 @@ interface MainContentProps {
   selectedDate: Date | null;
   selectedTags: string[];
   searchQuery: string;
+  onTagSelect?: (tags: string[]) => void;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
   selectedDate,
   selectedTags,
-  searchQuery
+  searchQuery,
+  onTagSelect
 }) => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,12 +102,20 @@ export const MainContent: React.FC<MainContentProps> = ({
     setMemos(prev => prev.filter(m => m.id !== deletedMemo.id));
   };
 
+  const handleTagClick = (tag: string) => {
+    const newSelectedTags = selectedTags.includes(tag)
+      ? selectedTags.filter(t => t !== tag)
+      : [...selectedTags, tag];
+    onTagSelect?.(newSelectedTags);
+  };
+
   const memoRenderer = (memo: Memo) => (
     <MemoView
       memo={memo}
       onEdit={handleEditMemo}
       onDelete={handleMemoDelete}
       onUpdate={handleMemoUpdate}
+      onTagClick={handleTagClick}
     />
   );
 

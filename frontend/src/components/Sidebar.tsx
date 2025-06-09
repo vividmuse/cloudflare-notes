@@ -16,6 +16,7 @@ import {
   FiGlobe
 } from "react-icons/fi";
 import { Memo, memosApi, User } from '../api';
+import { SettingsModal } from './SettingsModal';
 
 interface SidebarProps {
   user: User;
@@ -23,6 +24,7 @@ interface SidebarProps {
   onDateSelect: (date: Date | null) => void;
   onTagSelect: (tags: string[]) => void;
   onLogout: () => void;
+  onUserUpdate?: (user: User) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -30,7 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSearch, 
   onDateSelect, 
   onTagSelect, 
-  onLogout 
+  onLogout,
+  onUserUpdate 
 }) => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     todo: 0,
     public: 0
   });
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -300,12 +304,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <FiBarChart2 className="w-4 h-4" />
             统计
           </button>
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
             <FiSettings className="w-4 h-4" />
             设置
           </button>
         </div>
       </div>
+
+      {/* 设置模态框 */}
+      <SettingsModal
+        user={user}
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onUserUpdate={(updatedUser) => {
+          onUserUpdate?.(updatedUser);
+          setShowSettings(false);
+        }}
+      />
     </div>
   );
 }; 

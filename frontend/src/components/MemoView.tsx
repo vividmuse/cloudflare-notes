@@ -20,13 +20,15 @@ interface MemoViewProps {
   onEdit?: (memo: Memo) => void;
   onDelete?: (memo: Memo) => void;
   onUpdate?: (memo: Memo) => void;
+  onTagClick?: (tag: string) => void;
 }
 
 export const MemoView: React.FC<MemoViewProps> = ({
   memo,
   onEdit,
   onDelete,
-  onUpdate
+  onUpdate,
+  onTagClick
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -203,13 +205,14 @@ export const MemoView: React.FC<MemoViewProps> = ({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {tags.map((tag, index) => (
-            <span
+            <button
               key={index}
+              onClick={() => onTagClick?.(tag)}
               className="inline-flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200 transition-colors"
             >
               <FiHash className="w-3 h-3" />
               <span>{tag}</span>
-            </span>
+            </button>
           ))}
         </div>
       )}

@@ -4,6 +4,14 @@
 
 /* 基础样式 */
 html, body {
+  @apply h-full;
+}
+
+body {
+  overflow: hidden; /* 只在 body 上设置，允许内部滚动 */
+}
+
+#root {
   @apply h-full overflow-hidden;
 }
 

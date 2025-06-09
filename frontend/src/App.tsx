@@ -59,6 +59,10 @@ function App() {
     setSelectedTags(tags);
   };
 
+  const handleUserUpdate = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -82,11 +86,13 @@ function App() {
         onDateSelect={handleDateSelect}
         onTagSelect={handleTagSelect}
         onLogout={handleLogout}
+        onUserUpdate={handleUserUpdate}
       />
       <MainContent
         searchQuery={searchQuery}
         selectedDate={selectedDate}
         selectedTags={selectedTags}
+        onTagSelect={handleTagSelect}
       />
     </div>
   );
