@@ -1,0 +1,8 @@
+name = "memos-notes"
+pages_build_output_dir = "dist"
+
+[env.production]
+# 生产环境配置
+
+[env.preview]
+# 预览环境配置 

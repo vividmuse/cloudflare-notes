@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       proxy: {
         '/api': {
-          target: env.VITE_API_BASE || 'https://memos-lite.51min.win',
+          target: env.VITE_API_BASE || 'https://memos-lite.yourmin.workers.dev',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path,

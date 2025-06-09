@@ -200,4 +200,63 @@ html, body {
   .editor-toolbar button {
     @apply active:bg-gray-200 dark:active:bg-gray-700;
   }
+}
+
+/* Markdown 内容样式优化 */
+.memo-content {
+  @apply break-words;
+}
+
+.memo-content pre {
+  @apply overflow-x-auto bg-gray-50 p-3 rounded-md border;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.memo-content code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm;
+  word-break: break-all !important;
+}
+
+.memo-content pre code {
+  @apply bg-transparent p-0;
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+.memo-content p {
+  @apply break-words;
+  word-wrap: break-word !important;
+}
+
+.memo-content h1, .memo-content h2, .memo-content h3, 
+.memo-content h4, .memo-content h5, .memo-content h6 {
+  @apply break-words;
+  word-wrap: break-word !important;
+}
+
+.memo-content blockquote {
+  @apply break-words border-l-4 border-gray-300 pl-4 italic;
+  word-wrap: break-word !important;
+}
+
+.memo-content ul, .memo-content ol {
+  @apply break-words;
+}
+
+.memo-content table {
+  @apply table-auto w-full border-collapse;
+  word-break: break-all !important;
+}
+
+.memo-content td, .memo-content th {
+  @apply border border-gray-300 px-2 py-1;
+  word-break: break-all !important;
+}
+
+/* 确保长 URL 或代码不会溢出 */
+.memo-content a {
+  @apply break-all;
+  word-break: break-all !important;
 } 
