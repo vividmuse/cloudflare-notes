@@ -16,7 +16,14 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeApp = async () => {
+      // 应用保存的暗黑模式设置
+      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+      if (savedDarkMode) {
+        document.documentElement.classList.add('dark');
+      }
+
+      // 检查认证状态
       const token = localStorage.getItem('accessToken');
       const savedUser = localStorage.getItem('user');
       
@@ -35,7 +42,7 @@ function App() {
       setLoading(false);
     };
 
-    checkAuth();
+    initializeApp();
   }, []);
 
   const handleLogin = (userData: User) => {

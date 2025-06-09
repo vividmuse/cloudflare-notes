@@ -318,6 +318,26 @@ export const systemApi = {
     }
     return response.json();
   },
+
+  // 管理员专属设置
+  getAdminSettings: async (): Promise<{ allowRegistration: boolean }> => {
+    const response = await fetchWithAuth(`${API_BASE}/api/v1/admin/settings`);
+    if (!response.ok) {
+      throw new Error('Failed to get admin settings');
+    }
+    return response.json();
+  },
+
+  updateAdminSettings: async (settings: { allowRegistration?: boolean }): Promise<{ message: string }> => {
+    const response = await fetchWithAuth(`${API_BASE}/api/v1/admin/settings`, {
+      method: 'PATCH',
+      body: JSON.stringify(settings),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update admin settings');
+    }
+    return response.json();
+  },
 };
 
 // 用户管理 API

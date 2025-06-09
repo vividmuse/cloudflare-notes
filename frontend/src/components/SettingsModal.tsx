@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FiX, FiUser, FiMoon, FiSun, FiSave, FiCopy, FiEye, FiEyeOff } from 'react-icons/fi';
-import { authApi, type User } from '../api';
+import { FiX, FiUser, FiMoon, FiSun, FiSave, FiCopy, FiEye, FiEyeOff, FiShield } from 'react-icons/fi';
+import { authApi, systemApi, type User } from '../api';
 
 interface SettingsModalProps {
   user: User;
@@ -18,9 +18,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [nickname, setNickname] = useState(user.nickname || '');
   const [email, setEmail] = useState(user.email || '');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
   const [showToken, setShowToken] = useState(false);
   const [accessToken] = useState(localStorage.getItem('accessToken') || '');
+  
+  // 管理员设置
+  const [allowRegistration, setAllowRegistration] = useState(true);
+  const [isUpdatingAdminSettings, setIsUpdatingAdminSettings] = useState(false);
+  
+  // 检查是否为管理员
+  const isAdmin = user.role === 'HOST' || user.role === 'ADMIN';
+
+  // 初始化设置
+  React.useEffect(() => {
+    const initializeSettings = async () => {
+      if (isOpen) {
+        // 初始化暗黑模式
+        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+        setDarkMode(savedDarkMode);
+        
+        // 初始化管理员设置
+        if (isAdmin) {
+          try {
+            const adminSettings = await systemApi.getAdminSettings();
+            setAllowRegistration(adminSettings.allowRegistration);
+          } catch (error) {
+            console.error('Failed to load admin settings:', error);
+            // 使用localStorage作为后备
+            const savedAllowRegistration = localStorage.getItem('allowRegistration');
+            setAllowRegistration(savedAllowRegistration !== 'false');
+          }
+        }
+      }
+    };
+    
+    initializeSettings();
+  }, [isOpen, isAdmin]);
 
   if (!isOpen) return null;
 
@@ -42,6 +75,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       alert('保存失败，请重试');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  // 处理暗黑模式切换
+  const handleDarkModeToggle = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    
+    // 应用主题到 DOM
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  // 处理管理员设置保存
+  const handleAdminSettingsSave = async () => {
+    setIsUpdatingAdminSettings(true);
+    try {
+      await systemApi.updateAdminSettings({ allowRegistration });
+      
+      // 同时更新localStorage作为缓存
+      localStorage.setItem('allowRegistration', allowRegistration.toString());
+      
+      alert('管理员设置已保存');
+    } catch (error) {
+      console.error('Failed to save admin settings:', error);
+      alert('保存管理员设置失败，请重试');
+    } finally {
+      setIsUpdatingAdminSettings(false);
     }
   };
 
@@ -185,12 +250,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium text-gray-700">深色模式</div>
-                <div className="text-xs text-gray-500">切换深色主题（即将推出）</div>
+                <div className="text-xs text-gray-500">切换深色主题外观</div>
               </div>
               <button
-                onClick={() => setDarkMode(!darkMode)}
-                disabled
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                onClick={handleDarkModeToggle}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
                   darkMode ? 'bg-indigo-600' : 'bg-gray-200'
                 }`}
               >
@@ -202,6 +266,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* 管理员设置 - 仅管理员可见 */}
+          {isAdmin && (
+            <div className="border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                <FiShield className="w-4 h-4 mr-2" />
+                管理员设置
+              </h3>
+              
+              {/* 允许注册开关 */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-700">允许用户注册</div>
+                  <div className="text-xs text-gray-500">控制是否允许新用户注册账号</div>
+                </div>
+                <button
+                  onClick={() => setAllowRegistration(!allowRegistration)}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                    allowRegistration ? 'bg-green-600' : 'bg-red-400'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      allowRegistration ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleAdminSettingsSave}
+                  disabled={isUpdatingAdminSettings}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUpdatingAdminSettings ? '保存中...' : '保存管理员设置'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 底部 */}
