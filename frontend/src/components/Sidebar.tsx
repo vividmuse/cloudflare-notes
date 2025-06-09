@@ -53,14 +53,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [memosData, statsData] = await Promise.all([
-          memosApi.getAll({ pageSize: 100 }),
-          memosApi.getStats()
-        ]);
+        const memosData = await memosApi.getAll({ pageSize: 100 });
         setMemos(memosData.memos);
-        setStats(statsData);
+        
+        // 手动计算统计数据
+        const totalMemos = memosData.memos.length;
+        const pinnedMemos = memosData.memos.filter(memo => memo.pinned).length;
+        const todoMemos = memosData.memos.filter(memo => 
+          memo.content.includes('- [ ]') || 
+          memo.content.includes('- [x]') ||
+          memo.content.includes('* [ ]') ||
+          memo.content.includes('* [x]')
+        ).length;
+        const publicMemos = memosData.memos.filter(memo => memo.visibility === 'PUBLIC').length;
+        
+        setStats({
+          total: totalMemos,
+          pinned: pinnedMemos,
+          todo: todoMemos,
+          public: publicMemos
+        });
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        // 即使出错也设置默认值，避免显示undefined
+        setStats({
+          total: 0,
+          pinned: 0,
+          todo: 0,
+          public: 0
+        });
       }
     };
 
@@ -106,17 +127,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const allTags = Array.from(new Set(
     memos.flatMap((memo: Memo) => {
       // 从 memo.tags 获取
-      const apiTags = Array.isArray(memo.tags) ? memo.tags : 
-                     typeof memo.tags === 'string' ? JSON.parse(memo.tags || '[]') : [];
+      let apiTags: string[] = [];
+      if (Array.isArray(memo.tags)) {
+        apiTags = memo.tags;
+      } else if (typeof memo.tags === 'string') {
+        try {
+          const parsed = JSON.parse(memo.tags || '[]');
+          apiTags = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          apiTags = [];
+        }
+      }
+      
       // 从内容中提取
       const contentTags = extractTags(memo.content);
       
       console.log('Memo:', memo.id, 'API tags:', apiTags, 'Content tags:', contentTags);
       return [...apiTags, ...contentTags];
     })
-  )).filter(tag => tag && tag.trim()).sort();
+  )).filter(tag => tag && tag.trim() && tag.length > 0).sort();
 
-  console.log('All tags:', allTags);
+  console.log('All tags:', allTags, 'Total memos:', memos.length);
 
   // 搜索事件处理
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
