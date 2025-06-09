@@ -3251,21 +3251,50 @@ app.use("/api/v1/*", async (c, next) => {
   if (!auth || !auth.startsWith("Bearer ")) {
     throw new HTTPException(401, { message: "Unauthorized" });
   }
+  const token = auth.split(" ")[1];
+  const db = c.env.DB;
   try {
-    const token = auth.split(" ")[1];
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    if (typeof payload.id === "number" && typeof payload.name === "string") {
+    if (payload.type === "access_token") {
+      const tokenRecord = await db.prepare(
+        "SELECT user_id, expires_at FROM access_tokens WHERE access_token = ?"
+      ).bind(token).first();
+      if (!tokenRecord) {
+        throw new HTTPException(401, { message: "Access token not found" });
+      }
+      if (new Date(tokenRecord.expires_at) < /* @__PURE__ */ new Date()) {
+        throw new HTTPException(401, { message: "Access token expired" });
+      }
+      const userRecord = await db.prepare(
+        "SELECT id, username, created_at FROM users WHERE id = ?"
+      ).bind(tokenRecord.user_id).first();
+      if (!userRecord) {
+        throw new HTTPException(401, { message: "User not found" });
+      }
       const user = {
-        id: payload.id,
-        name: payload.name,
-        role: payload.role || "USER",
+        id: userRecord.id,
+        name: generateUserName(userRecord.id),
+        nickname: userRecord.username,
+        role: userRecord.id === 1 ? "HOST" : "USER",
         rowStatus: "NORMAL",
-        createTime: payload.createTime || (/* @__PURE__ */ new Date()).toISOString(),
+        createTime: userRecord.created_at,
         updateTime: (/* @__PURE__ */ new Date()).toISOString()
       };
       c.set("user", user);
     } else {
-      throw new Error("Invalid token payload");
+      if (typeof payload.id === "number" && typeof payload.name === "string") {
+        const user = {
+          id: payload.id,
+          name: payload.name,
+          role: payload.role || "USER",
+          rowStatus: "NORMAL",
+          createTime: payload.createTime || (/* @__PURE__ */ new Date()).toISOString(),
+          updateTime: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        c.set("user", user);
+      } else {
+        throw new Error("Invalid token payload");
+      }
     }
     return next();
   } catch (err) {
@@ -3926,7 +3955,7 @@ app.get("/api/v1/system/stats", async (c) => {
   }
   const [userStats, memoStats, activityStats] = await Promise.all([
     db.prepare("SELECT COUNT(*) as total FROM users").first(),
-    db.prepare("SELECT COUNT(*) as total FROM notes").first(),
+    db.prepare("SELECT COUNT(*) as total FROM memos").first(),
     db.prepare("SELECT COUNT(*) as total FROM activities").first()
   ]);
   return c.json({
@@ -3935,6 +3964,77 @@ app.get("/api/v1/system/stats", async (c) => {
     activities: activityStats?.total || 0,
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   });
+});
+app.get("/api/v1/access-tokens", async (c) => {
+  const user = c.get("user");
+  const db = c.env.DB;
+  const tokens = await db.prepare(
+    "SELECT id, name, expires_at, created_at FROM access_tokens WHERE user_id = ? ORDER BY created_at DESC"
+  ).bind(user.id).all();
+  const tokenList = tokens.results.map((token) => ({
+    id: token.id,
+    name: token.name,
+    expiresAt: token.expires_at,
+    createdAt: token.created_at
+  }));
+  return c.json({ accessTokens: tokenList });
+});
+app.post("/api/v1/access-tokens", async (c) => {
+  const user = c.get("user");
+  const { name, expiresAt } = await c.req.json();
+  const db = c.env.DB;
+  const tokenPayload = {
+    id: user.id,
+    name: user.name,
+    role: user.role,
+    createTime: user.createTime,
+    type: "access_token"
+    // 标记为 access token
+  };
+  const token = await new SignJWT(tokenPayload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(new Date(expiresAt).getTime() / 1e3).sign(JWT_SECRET);
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  const result = await db.prepare(
+    "INSERT INTO access_tokens (name, access_token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).bind(name, token, user.id, expiresAt, now).run();
+  const tokenId = result.meta.last_row_id || 0;
+  await logActivity(
+    db,
+    user.id,
+    "access_token.created",
+    "INFO",
+    { name, expiresAt },
+    tokenId,
+    "access_token"
+  );
+  return c.json({
+    id: tokenId,
+    name,
+    accessToken: token,
+    expiresAt,
+    createdAt: now
+  });
+});
+app.delete("/api/v1/access-tokens/:id", async (c) => {
+  const user = c.get("user");
+  const tokenId = c.req.param("id");
+  const db = c.env.DB;
+  const token = await db.prepare(
+    "SELECT name FROM access_tokens WHERE id = ? AND user_id = ?"
+  ).bind(tokenId, user.id).first();
+  if (!token) {
+    throw new HTTPException(404, { message: "Access token not found" });
+  }
+  await db.prepare("DELETE FROM access_tokens WHERE id = ?").bind(tokenId).run();
+  await logActivity(
+    db,
+    user.id,
+    "access_token.deleted",
+    "INFO",
+    { name: token.name },
+    parseInt(tokenId),
+    "access_token"
+  );
+  return c.json({});
 });
 app.get("/api/v1/webhooks", async (c) => {
   const user = c.get("user");
@@ -4083,6 +4183,42 @@ app.get("/api/auth/me", async (c) => {
     }
   } catch (err) {
     throw new HTTPException(401, { message: "Invalid token" });
+  }
+});
+app.post("/api/migrate-access-tokens", async (c) => {
+  const db = c.env.DB;
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS access_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name VARCHAR(100) NOT NULL,
+        access_token TEXT NOT NULL UNIQUE,
+        user_id INTEGER NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `).run();
+    await db.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_access_tokens_user_id ON access_tokens(user_id)
+    `).run();
+    await db.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_access_tokens_token ON access_tokens(access_token)
+    `).run();
+    await db.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_access_tokens_expires_at ON access_tokens(expires_at)
+    `).run();
+    return c.json({
+      message: "Access tokens table created successfully",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    console.error("Migration error:", error);
+    return c.json({
+      error: "Migration failed",
+      details: error.message
+    }, 500);
   }
 });
 var src_default = app;

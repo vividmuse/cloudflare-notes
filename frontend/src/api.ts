@@ -77,6 +77,13 @@ export interface MemoStats {
   public: number;
 }
 
+export interface AccessToken {
+  id: number;
+  name: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
 // 通用的认证请求包装器
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');
@@ -356,6 +363,46 @@ export const usersApi = {
       throw new Error('Failed to fetch user');
     }
     return response.json();
+  },
+};
+
+// Access Token API
+export const accessTokenApi = {
+  getAll: async (): Promise<{ accessTokens: AccessToken[] }> => {
+    const response = await fetchWithAuth(`${API_BASE}/api/v1/access-tokens`);
+    if (!response.ok) {
+      throw new Error('Failed to get access tokens');
+    }
+    return response.json();
+  },
+
+  create: async (data: {
+    name: string;
+    expiresAt: string;
+  }): Promise<{
+    id: number;
+    name: string;
+    accessToken: string;
+    expiresAt: string;
+    createdAt: string;
+  }> => {
+    const response = await fetchWithAuth(`${API_BASE}/api/v1/access-tokens`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create access token');
+    }
+    return response.json();
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetchWithAuth(`${API_BASE}/api/v1/access-tokens/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete access token');
+    }
   },
 };
 
