@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiUser, FiMoon, FiSun, FiSave, FiCopy, FiEye, FiEyeOff, FiShield, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiX, FiUser, FiMoon, FiSun, FiSave, FiCopy, FiShield, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { authApi, systemApi, accessTokenApi, type User, type AccessToken } from '../api';
 
 interface SettingsModalProps {
@@ -22,8 +22,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   
   // 外观设置
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
-  const [showToken, setShowToken] = useState(false);
-  const [accessToken] = useState(localStorage.getItem('accessToken') || '');
   
   // 管理员设置
   const [allowRegistration, setAllowRegistration] = useState(true);
